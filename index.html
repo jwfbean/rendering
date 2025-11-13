@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Latency Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        .intro {
+            background: #f0f9ff;
+            padding: 25px;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+            margin-top: 30px;
+        }
+        
+        .intro p {
+            margin: 10px 0;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 40px 0;
+        }
+        
+        .chart-title {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            color: #1a1a1a;
+        }
+        
+        .bars-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            gap: 40px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .bar-container {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        
+        .bar {
+            width: 50px;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 10px;
+        }
+        
+        .bar-label-inline {
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+        
+        .min-bar {
+            background: #3b82f6;
+        }
+        
+        .max-bar {
+            background: #ef4444;
+        }
+        
+        /* Tiger Cloud - tiny */
+        .tiger-cloud .min-bar {
+            height: 2px;
+        }
+        
+        .tiger-cloud .max-bar {
+            height: 3px;
+        }
+        
+        /* Azure + TimescaleDB */
+        .timescale .min-bar {
+            height: 80px;
+        }
+        
+        .timescale .max-bar {
+            height: 400px;
+        }
+        
+        /* Vanilla - THE TALL ONE */
+        .vanilla .min-bar {
+            height: 560px;
+        }
+        
+        .vanilla .max-bar {
+            height: 9600px;
+        }
+        
+        .bar-name {
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95em;
+            max-width: 150px;
+            line-height: 1.3;
+            margin-top: 15px;
+        }
+        
+        .bar-stats {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e5e5;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e5e5e5;
+            z-index: 1001;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0066cc, #00cc66);
+            width: 0%;
+            transition: width 0.1s;
+        }
+        
+        .scroll-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0066cc;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-weight: 600;
+            animation: pulse 2s infinite;
+            z-index: 1000;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .milestone {
+            text-align: center;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin: 100px 0;
+        }
+        
+        .milestone h2 {
+            font-size: 2em;
+            color: #0066cc;
+            margin-bottom: 20px;
+        }
+        
+        .milestone p {
+            font-size: 1.2em;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .milestone.final {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .milestone.final h2 {
+            color: white;
+            font-size: 2.5em;
+        }
+        
+        .milestone.final p {
+            color: rgba(255,255,255,0.95);
+        }
+        
+        .milestone.final .cta {
+            margin-top: 30px;
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .milestone.final .cta:hover {
+            background: #f0f0f0;
+        }
+        
+        .vanilla-message {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="scroll-hint" id="scrollHint">
+        Keep scrolling... ⬇️
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Query Latency Comparison</h1>
+            <p>The same query. The same data. Three very different experiences.</p>
+            
+            <div class="intro">
+                <p><strong>We ran identical queries</strong> against three different PostgreSQL setups to measure real-world performance.</p>
+                <p style="margin-top: 15px;">The bars below are scaled proportionally to actual latency. Yes, you'll need to scroll. A lot.</p>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2 class="chart-title">Query Latency (seconds)</h2>
+            
+            <div class="bars-wrapper">
+                <div class="bar-group tiger-cloud">
+                    <div class="bar-container">
+                        <div class="bar min-bar" title="Min: 0.004s (4ms)">
+                            <span class="bar-label-inline">Min</span>
+                        </div>
+                        <div class="bar max-bar" title="Max: 0.006s (6ms)">
+                            <span class="bar-label-inline">Max</span>
+                        </div>
+                    </div>
+                    <div class="bar-name">Tiger Cloud</div>
+                    <div class="bar-stats">
+                        Min: 4ms<br>
+                        Max: 6ms
+                    </div>
+                </div>
+                
+                <div class="bar-group timescale">
+                    <div class="bar-container">
+                        <div class="bar min-bar" title="Min: 1s">
+                            <span class="bar-label-inline">Min: 1s</span>
+                        </div>
+                        <div class="bar max-bar" title="Max: 5s">
+                            <span class="bar-label-inline">Max: 5s</span>
+                        </div>
+                    </div>
+                    <div class="bar-name">Azure Managed Postgres + TimescaleDB</div>
+                    <div class="bar-stats">
+                        Min: 1 second<br>
+                        Max: 5 seconds
+                    </div>
+                </div>
+                
+                <div class="bar-group vanilla">
+                    <div class="bar-container">
+                        <div class="bar min-bar" title="Min: 7s">
+                            <span class="bar-label-inline">Min: 7s</span>
+                        </div>
+                        <div class="bar max-bar" title="Max: 120s">
+                            <span class="bar-label-inline">Max: 120s</span>
+                            <div class="vanilla-message" style="top: 2000px;">Still scrolling? ⬇️</div>
+                            <div class="vanilla-message" style="top: 4000px;">This is what 120 seconds feels like...</div>
+                            <div class="vanilla-message" style="top: 6000px;">Almost there... ⬇️</div>
+                            <div class="vanilla-message" style="top: 8000px;">You could have run it on Tiger Cloud 20,000 times by now</div>
+                        </div>
+                    </div>
+                    <div class="bar-name">Vanilla Azure Managed Postgres</div>
+                    <div class="bar-stats">
+                        Min: 7 seconds<br>
+                        Max: 120 seconds
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color min-bar"></div>
+                    <span>Minimum Latency</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color max-bar"></div>
+                    <span>Maximum Latency</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="milestone">
+            <h2>25% Through the Vanilla Postgres Bar</h2>
+            <p>If this were a real query, your users would already be frustrated.</p>
+            <p>Tiger Cloud would have finished 5,000 times already.</p>
+        </div>
+        
+        <div class="milestone">
+            <h2>50% Through</h2>
+            <p>One minute down. One to go.</p>
+            <p>Time to grab that coffee ☕</p>
+        </div>
+        
+        <div class="milestone">
+            <h2>75% There...</h2>
+            <p>Tiger Cloud delivers results in 4-6 milliseconds.</p>
+            <p>That's faster than a single frame of video at 60fps.</p>
+        </div>
+        
+        <div class="milestone final">
+            <h2>🎉 You Made It! 🎉</h2>
+            <p style="font-size: 1.4em; margin: 20px 0;"><strong>That scroll? That was 120 seconds of query latency.</strong></p>
+            <p>Tiger Cloud delivers the same results in under 6 milliseconds.</p>
+            <p style="margin-top: 30px; font-size: 1.3em;"><strong>That's over 20,000× faster.</strong></p>
+            <a href="#" class="cta">Learn More About Tiger Cloud</a>
+        </div>
+    </div>
+    
+    <script>
+        window.addEventListener('scroll', () => {
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+            
+            document.getElementById('progressBar').style.width = scrollPercent + '%';
+            
+            const scrollHint = document.getElementById('scrollHint');
+            if (scrollPercent > 50) {
+                scrollHint.style.display = 'none';
+            } else {
+                scrollHint.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
