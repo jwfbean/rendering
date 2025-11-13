@@ -55,79 +55,28 @@
             color: #1a1a1a;
         }
         
-        .chart-layout {
+        /* Bars and content in same space */
+        .chart-content-wrapper {
+            position: relative;
+            min-height: 12000px;
+        }
+        
+        .bars-row {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             display: flex;
-            gap: 40px;
-            align-items: flex-start;
-        }
-        
-        /* Left side - text content */
-        .content-column {
-            flex: 1;
-            padding: 20px;
-        }
-        
-        .content-column h2 {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-        }
-        
-        .content-column h3 {
-            font-size: 1.3em;
-            margin: 30px 0 15px;
-            color: #0066cc;
-        }
-        
-        .content-column p {
-            font-size: 1.05em;
-            line-height: 1.7;
-            margin-bottom: 15px;
-            color: #444;
-        }
-        
-        .metric-box {
-            background: #f0f9ff;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-            border-left: 4px solid #0066cc;
-        }
-        
-        .metric-box h4 {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            color: #0066cc;
-        }
-        
-        .metric-box p {
-            margin: 5px 0;
-            font-size: 0.95em;
-        }
-        
-        /* Right side - bars */
-        .bars-column {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            justify-content: space-between;
             align-items: flex-end;
-            gap: 0;
-            padding: 0;
+            width: 100%;
+            pointer-events: none;
         }
         
         .bar-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-self: center;
-        }
-        
-        .bar-group:first-child {
-            justify-self: start;
-        }
-        
-        .bar-group:last-child {
-            justify-self: end;
         }
         
         .bar-pair {
@@ -140,7 +89,6 @@
         .bar {
             width: 40px;
             border-radius: 4px 4px 0 0;
-            position: relative;
         }
         
         .min-bar {
@@ -191,6 +139,53 @@
             font-size: 0.8em;
             color: #666;
             margin-top: 5px;
+        }
+        
+        /* Content flows in the same space as bars */
+        .content-area {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+            padding-top: 40px;
+        }
+        
+        .content-area h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+        
+        .content-area h3 {
+            font-size: 1.3em;
+            margin: 30px 0 15px;
+            color: #0066cc;
+        }
+        
+        .content-area p {
+            font-size: 1.05em;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            color: #444;
+        }
+        
+        .metric-box {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #0066cc;
+        }
+        
+        .metric-box h4 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #0066cc;
+        }
+        
+        .metric-box p {
+            margin: 5px 0;
+            font-size: 0.95em;
         }
         
         .legend {
@@ -324,78 +319,9 @@
         <div class="chart-section">
             <h2 class="chart-title">Query Latency (seconds)</h2>
             
-            <div class="chart-layout">
-                <!-- Left: Content that flows with the scroll -->
-                <div class="content-column">
-                    <h2>Understanding the Test</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                    
-                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                    
-                    <h3>Test Methodology</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</p>
-                    
-                    <div class="metric-box">
-                        <h4>Tiger Cloud</h4>
-                        <p><strong>Min:</strong> 4ms | <strong>Max:</strong> 6ms</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                    </div>
-                    
-                    <div class="metric-box">
-                        <h4>Azure Managed Postgres + TimescaleDB</h4>
-                        <p><strong>Min:</strong> 1s | <strong>Max:</strong> 5s</p>
-                        <p>Sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                    </div>
-                    
-                    <div class="metric-box">
-                        <h4>Vanilla Azure Managed Postgres</h4>
-                        <p><strong>Min:</strong> 7s | <strong>Max:</strong> 120s</p>
-                        <p>Excepteur sint occaecat cupidatat non proident.</p>
-                    </div>
-                    
-                    <h3>Key Findings</h3>
-                    <p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
-                    
-                    <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.</p>
-                    
-                    <h3>Technical Details</h3>
-                    <p>Aenean lacinia bibendum nulla sed consectetur. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam.</p>
-                    
-                    <p>Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-                    
-                    <div class="milestone">
-                        <h3>25% Through the Vanilla Bar</h3>
-                        <p>Still scrolling through this massive latency...</p>
-                    </div>
-                    
-                    <h3>Performance Impact</h3>
-                    <p>Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.</p>
-                    
-                    <p>Curabitur blandit tempus porttitor. Maecenas sed diam eget risus varius blandit sit amet non magna. Donec id elit non mi porta gravida at eget metus.</p>
-                    
-                    <div class="milestone">
-                        <h3>50% There...</h3>
-                        <p>One minute down, one to go.</p>
-                    </div>
-                    
-                    <h3>Real-World Implications</h3>
-                    <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.</p>
-                    
-                    <p>Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-                    
-                    <div class="milestone">
-                        <h3>75% Through</h3>
-                        <p>Tiger Cloud would have finished 15,000 times by now.</p>
-                    </div>
-                    
-                    <h3>Conclusion</h3>
-                    <p>Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    
-                    <p>Vestibulum id ligula porta felis euismod semper. Maecenas faucibus mollis interdum. Sed posuere consectetur est at lobortis.</p>
-                </div>
-                
-                <!-- Right: The three bars -->
-                <div class="bars-column">
+            <div class="chart-content-wrapper">
+                <!-- Bars spanning full width of the white section -->
+                <div class="bars-row">
                     <div class="bar-group tiger">
                         <div class="bar-pair">
                             <div class="bar min-bar"></div>
@@ -423,6 +349,74 @@
                         <div class="bar-stats">7-120s</div>
                     </div>
                 </div>
+                
+                <!-- Content flows IN the same space as the bars -->
+                <div class="content-area">
+                <h2>Understanding the Test</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                
+                <h3>Test Methodology</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</p>
+                
+                <div class="metric-box">
+                    <h4>Tiger Cloud</h4>
+                    <p><strong>Min:</strong> 4ms | <strong>Max:</strong> 6ms</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+                
+                <div class="metric-box">
+                    <h4>Azure Managed Postgres + TimescaleDB</h4>
+                    <p><strong>Min:</strong> 1s | <strong>Max:</strong> 5s</p>
+                    <p>Sed do eiusmod tempor incididunt ut labore et dolore.</p>
+                </div>
+                
+                <div class="metric-box">
+                    <h4>Vanilla Azure Managed Postgres</h4>
+                    <p><strong>Min:</strong> 7s | <strong>Max:</strong> 120s</p>
+                    <p>Excepteur sint occaecat cupidatat non proident.</p>
+                </div>
+                
+                <h3>Key Findings</h3>
+                <p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
+                
+                <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.</p>
+                
+                <div class="milestone">
+                    <h3>25% Through the Vanilla Bar</h3>
+                    <p>Still scrolling through this massive latency...</p>
+                </div>
+                
+                <h3>Technical Details</h3>
+                <p>Aenean lacinia bibendum nulla sed consectetur. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam.</p>
+                
+                <p>Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+                
+                <div class="milestone">
+                    <h3>50% There...</h3>
+                    <p>One minute down, one to go.</p>
+                </div>
+                
+                <h3>Performance Impact</h3>
+                <p>Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.</p>
+                
+                <p>Curabitur blandit tempus porttitor. Maecenas sed diam eget risus varius blandit sit amet non magna. Donec id elit non mi porta gravida at eget metus.</p>
+                
+                <div class="milestone">
+                    <h3>75% Through</h3>
+                    <p>Tiger Cloud would have finished 15,000 times by now.</p>
+                </div>
+                
+                <h3>Real-World Implications</h3>
+                <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.</p>
+                
+                <p>Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+                
+                <h3>Conclusion</h3>
+                <p>Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                
+                <p>Vestibulum id ligula porta felis euismod semper. Maecenas faucibus mollis interdum. Sed posuere consectetur est at lobortis.</p>
             </div>
             
             <div class="legend">
