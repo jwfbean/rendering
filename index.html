@@ -352,14 +352,25 @@
                 
                 <!-- Content flows IN the same space as the bars -->
                 <div class="content-area">
-                <h2>Understanding the Test</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <h2>Summary</h2>
+                <p>As part of launching Tiger Cloud on Azure, the marketing team at Tiger Data ran RTABench comparing Tiger Cloud on Azure with Azure Database for Postgres, with and without the TimescaleDB extension enabled. Since RTABench is written to showcase TimescaleDB, we expected both Timescale variants to outperform vanilla Azure Database for Postgres. We were genuinely curious about the extent of performance differences we would observe.</p>
                 
-                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                
-                <h3>Test Methodology</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</p>
-                
+                <p>As expected,Tiger Could dominates this benchmark, showing consistent millisecond latency across most queries. This is amazing from a marketing standpoint and definitely the reason you should choose Tiger Cloud for your postgres-based analytic or hybrid database workloads in Azure. Also as expected, TimescaleDB outperforms vanilla Azure Managed Postgres on most queries by a lot. This shows the significant benefits of the foundational capabilities of TimescaleDB such as hypertables. </p>
+
+                <p>While there were generally no surprises in the benchmark results, appreciating the observed differences between the selected platforms boils down to understanding the scale differences between milliseconds, seconds and minutes. Hence, we’re supplying a visual aid: the bar on the right represents the observed response time (7 seconds to 2 minutes) for most queries for vanilla Azure managed Postgres. At the bottom, you see the improvements observed when the TimescaleDB extension (1-5 seconds) is enabled as well as the millisecond latency observed with Tiger Cloud (4-6 milliseconds). As you scroll, you can learn about the tests we ran, how you can run it yourself, and why these differences are so significant.</p>
+                    
+                <h2>Test Methodology</h2>
+                <p>Tiger Cloud won decisively when compared to Azure Database for Postgres, with and without the TimescaleDB Extension. Tiger Cloud dramatically outperforms Azure TimescaleDB and Azure Managed Postgres, with typical speedups of 100x-1000x on analytical queries over time-series data. This is expected since Tiger Cloud has significant architectural advantages for real-time analytics workloads, such as columnar storage, vectorized execution, and optimized indexing strategies.</p>
+                <p>Of note:</p>
+                <ol>
+                    <li>Tiger Cloud dramatically outperforms on complex queries: Queries involving large scans, filtering, or aggregations over the time-series data show dramatic performance differences (100x-7000x faster)</li>
+                    <li>Tiger Cloud shows remarkably consistent sub-10ms response times across nearly all queries, while TimescaleDB varies from milliseconds to 30+ seconds
+</li>
+                </ol>
+                <h2>Benchmark Details: RTABench on Azure</h2>
+<p>RTABench, a real-time analytics benchmark, measures the ability of a transactional database to handle analytic queries, traditionally thought of as an antipattern. The benchmark uses a normalized schema that reflects how most applications store and manage data. It endeavors to measure how well databases handle real-time analytic queries that require joins and filtering—a scenario missing from other analytics benchmarks.</p>
+                    <p>RTABench includes a dataset with ~171 million events that is large enough to run performance benchmarks but lightweight enough to set up easily and quickly. The benchmark includes 1,102 customers, 9,255 products and 10,010,342 orders, ensuring RTABench can test query performance under realistic application workloads while remaining scalable for different database configurations.
+                </p>
                 <div class="metric-box">
                     <h4>Tiger Cloud</h4>
                     <p><strong>Min:</strong> 4ms | <strong>Max:</strong> 6ms</p>
