@@ -352,82 +352,172 @@
                 
                 <!-- Content flows IN the same space as the bars -->
                 <div class="content-area">
-                <h2>Summary</h2>
-                <p>As part of launching Tiger Cloud on Azure, the marketing team at Tiger Data ran RTABench comparing Tiger Cloud on Azure with Azure Database for Postgres, with and without the TimescaleDB extension enabled. Since RTABench is written to showcase TimescaleDB, we expected both Timescale variants to outperform vanilla Azure Database for Postgres. We were genuinely curious about the extent of performance differences we would observe.</p>
-                
-                <p>As expected,Tiger Could dominates this benchmark, showing consistent millisecond latency across most queries. This is amazing from a marketing standpoint and definitely the reason you should choose Tiger Cloud for your postgres-based analytic or hybrid database workloads in Azure. Also as expected, TimescaleDB outperforms vanilla Azure Managed Postgres on most queries by a lot. This shows the significant benefits of the foundational capabilities of TimescaleDB such as hypertables. </p>
+                    <h2>Benchmark Details: RTABench on Azure</h2>
 
-                <p>While there were generally no surprises in the benchmark results, appreciating the observed differences between the selected platforms boils down to understanding the scale differences between milliseconds, seconds and minutes. Hence, we’re supplying a visual aid: the bar on the right represents the observed response time (7 seconds to 2 minutes) for most queries for vanilla Azure managed Postgres. At the bottom, you see the improvements observed when the TimescaleDB extension (1-5 seconds) is enabled as well as the millisecond latency observed with Tiger Cloud (4-6 milliseconds). As you scroll, you can learn about the tests we ran, how you can run it yourself, and why these differences are so significant.</p>
-                    
-                <h2>Test Methodology</h2>
-                <p>Tiger Cloud won decisively when compared to Azure Database for Postgres, with and without the TimescaleDB Extension. Tiger Cloud dramatically outperforms Azure TimescaleDB and Azure Managed Postgres, with typical speedups of 100x-1000x on analytical queries over time-series data. This is expected since Tiger Cloud has significant architectural advantages for real-time analytics workloads, such as columnar storage, vectorized execution, and optimized indexing strategies.</p>
-                <p>Of note:</p>
-                <ol>
-                    <li>Tiger Cloud dramatically outperforms on complex queries: Queries involving large scans, filtering, or aggregations over the time-series data show dramatic performance differences (100x-7000x faster)</li>
-                    <li>Tiger Cloud shows remarkably consistent sub-10ms response times across nearly all queries, while TimescaleDB varies from milliseconds to 30+ seconds
-</li>
-                </ol>
-                <h2>Benchmark Details: RTABench on Azure</h2>
 <p>RTABench, a real-time analytics benchmark, measures the ability of a transactional database to handle analytic queries, traditionally thought of as an antipattern. The benchmark uses a normalized schema that reflects how most applications store and manage data. It endeavors to measure how well databases handle real-time analytic queries that require joins and filtering—a scenario missing from other analytics benchmarks.</p>
-                    <p>RTABench includes a dataset with ~171 million events that is large enough to run performance benchmarks but lightweight enough to set up easily and quickly. The benchmark includes 1,102 customers, 9,255 products and 10,010,342 orders, ensuring RTABench can test query performance under realistic application workloads while remaining scalable for different database configurations.
-                </p>
-                <div class="metric-box">
-                    <h4>Tiger Cloud</h4>
-                    <p><strong>Min:</strong> 4ms | <strong>Max:</strong> 6ms</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+
+<p>RTABench includes a dataset with ~171 million events that is large enough to run performance benchmarks but lightweight enough to set up easily and quickly. The benchmark includes 1,102 customers, 9,255 products and 10,010,342 orders, ensuring RTABench can test query performance under realistic application workloads while remaining scalable for different database configurations.</p>
+
+<p>Where available, RTABench leverages TimescaleDB features such as hypertables, continuous aggregates, compression, columnar storage, and so on. So TimescaleDB is expected to outperform vanilla Postgres by a lot. Even so, an RTABench result does illustrate the benefits of Tiger Cloud in Azure and puts contrasts with the other data infrastructure available with Azure in stark relief.</p>
+
+<h3>We ran RTABench on three different postgres services on Azure:</h3>
+
+<div class="metric-box">
+    <h4>Tiger Cloud on Azure</h4>
+</div>
+
+<img src="images/tiger-cloud-azure.png" alt="Tiger Cloud service selection interface">
+
+<div class="metric-box">
+    <h4>Azure Database for Postgres</h4>
+</div>
+
+<img src="images/image2.png" alt="Azure Database for Postgres connection details">
+<img src="images/image3.png" alt="Azure Database compute and storage configuration">
+
+<div class="metric-box">
+    <h4>Azure Database for Postgres with the TimescaleDB extension enabled</h4>
+</div>
+
+<p>Because we were working with a pre-release version of Tiger Cloud and we were anticipating having to debug as we go, we replaced the Terraform invocation with a manual setup process, and tweaked the RTABench startup script to take a postgres connect string instead of deriving one from the output of Terraform. We also removed references to unsupported features on the individual platform, such as hypertables on vanilla postgres or continuous aggregates for TimescaleDB. These tweaks were minimal and were just with the execution script, not with the data, queries, or ingest logic of RTABench. You can see them for yourself here, where we added variants of RTABench for manually configured Postgres.</p>
+
+<p>The client host was a Standard_D2s_v3 instance running Linux (ubuntu 24.04) with 2 vCPUs and 8GB RAM, deployed to the same Azure region as the database systems tested (Western Europe). In order to accommodate the data set, we increased the available disk to 128GB. The impact on load times when running a client host outside the database region was significant.</p>
+
+<img src="images/image7.png" alt="Benchmark client host Azure instance details">
+<img src="images/image8.png" alt="Azure instance disk configuration">
+
+<p>We analyzed the results by feeding the benchmark output files to Claude, having a conversation, and double-checking that the conclusions were sound. That was fun. Here are some examples of these interactions:</p>
+
+<p>First, we told Claude we worked in Marketing. This made it unreasonably excited about the Tiger Cloud results. We expected those, but the visual aid to your right illustrates the scale of the performance difference. Comparing milliseconds to minutes is no joke.</p>
+
+<img src="images/image4.png" alt="Claude analysis showing devastating performance results">
+
+<div class="milestone">
+    <h3>Still Scrolling?</h3>
+    <p>This is what 120 seconds of query latency feels like...</p>
+</div>
+
+<p>When running RTABench on Azure Managed Postgres with TimescaleDB extension, we got a little confused because the TimescaleDB version documented by Microsoft didn't match what was reported in the benchmark output. We were also not 100% sure that we had properly enabled the postgres extension for the test. It turns out we did, and the document we saw was just old.</p>
+
+<img src="images/image5.png" alt="TimescaleDB version verification output">
+
+<p>Also, Claude helped us evaluate the validity of the benchmark output so we didn't have to write scan output files looking for problems, errors or anomalies:</p>
+
+<img src="images/image6.png" alt="Claude validation of benchmark results">
+
+<h2>Running RTABench</h2>
+
+<h3>Tiger Cloud Benchmark</h3>
+
+<p>Sign up for Tiger Cloud and select a "Real-time analytics" service type. Spin up an 8 CPU 32GB dev service in Azure.</p>
+
+<img src="images/image11.png" alt="Tiger Cloud service configuration">
+<img src="images/image12.png" alt="Tiger Cloud compute size selection">
+
+<p>Note the connection string or save the config:</p>
+
+<img src="images/image13.png" alt="Tiger Cloud connection information">
+
+<p>Start a Standard_D2s_v3 instance running Linux (ubuntu 24.04) with 2 vCPUs and 8GB RAM. Increase its disk size to accommodate the data set.</p>
+
+<p>Git clone RTABench. This is a fork that takes a connection string for Postgres rather than spinning it up with Terraform. In the tigercloud-manual directory, edit benchmark.sh to provide your connection string.</p>
+
+<p>To run the benchmark in the background and correct for inconsistent network connections between your cafe and your client host, use nohup and make it a background process:</p>
+
+<p><code>nohup ./benchmark.sh > benchmark_output.log 2>&1 &</code></p>
+
+<p>When done, in addition to a verbose report, the output should contain query times measured in very few seconds. One line per query, each query runs three times.</p>
+
+<div class="milestone">
+    <h3>Halfway There</h3>
+    <p>Tiger Cloud would have finished 10,000 times by now.</p>
+</div>
+
+<h3>Azure Managed Postgres benchmark</h3>
+
+<p>Now that we have a Tiger Cloud baseline, let's compare it to Azure Managed Postgres. We thought this was naive vanilla postgres, so we don't have any timescale specific features such as hypertables, let alone continuous aggregates or vectorized storage. We use the postgres test in RTAbench for this.</p>
+
+<p>In Azure portal, create an Azure Database for Postgres Flexible Servers instance in the same region as the client host, matching the compute and storage for the Tiger Cloud instance. It's expensive, so don't leave it running for a long time.</p>
+
+<p>You can view the connection string from the Azure portal as well. On the client host, in the postgres-manual subdirectory, edit benchmark.sh and provide the connection string. Use nohup and make it a background process:</p>
+
+<p><code>nohup ./benchmark.sh > benchmark_output.log 2>&1 &</code></p>
+
+<p>After a while, your output should contain values measured in quite a few seconds.</p>
+
+<h3>TimescaleDB benchmark</h3>
+
+<p>The TimescaleDB extension that's available with Azure Database for Postgres is the Apache 2 Licensed edition. It lacks row and columnar storage, native compression, and incremental continuous aggregates.</p>
+
+<p>To enable the TimescaleDB extension on your Azure Database extension, click TIMESCALEDB on azure.extensions and shared_preload_libraries:</p>
+
+<img src="images/image9.png" alt="Azure TimescaleDB extension configuration">
+<img src="images/image10.png" alt="Azure shared preload libraries configuration">
+
+<p>This will require a restart of postgres. That should take less than 5 minutes. In the timescale-manual directory, edit benchmark.sh and provide the connection string. Use nohup and make it a background process:</p>
+
+<p><code>nohup ./benchmark.sh > benchmark_output.log 2>&1 &</code></p>
+
+<p>Examine the output. You may see errors around unsupported functions such as continuous aggregates. This is to be expected due to the limitations with Apache Licensed TimescaleDB.</p>
+
+<div class="milestone">
+    <h3>75% Through</h3>
+    <p>Almost at the end of this Vanilla Postgres query...</p>
+</div>
+
+<h3>Resetting Postgres</h3>
+
+<p>Between tests, and if you need to restart due to an issue you can wipe Postgres clean as follows:</p>
+
+<p><code>psql "$CONNECTION_STRING" -c "DROP SCHEMA public CASCADE;"<br>
+psql "$CONNECTION_STRING" -c "CREATE SCHEMA public;"<br>
+psql "$CONNECTION_STRING" -c "GRANT ALL ON SCHEMA public TO jwfbean;"<br>
+psql "$CONNECTION_STRING" -c "GRANT ALL ON SCHEMA public TO public;"</code></p>
+
+<h2>Raw Results</h2>
+
+<p>After you run the benchmarks and have the output, you should see results approximating the below. If you don't feel like combing through the text files and reasoning for yourself, you can upload them to your favorite LLM and ask for summary results. This table is a direct output from Claude after manually clarifying the different supported features on each platform.</p>
+
+<div class="metric-box">
+    <h4>Query Performance Summary</h4>
+    <p><strong>Most Queries:</strong> Tiger Cloud: 4-6ms | Azure + TimescaleDB: 1-5s | Vanilla Azure: 7s-2m</p>
+    <p><strong>Medium Complexity:</strong> Tiger Cloud: 115-365ms | Azure + TimescaleDB: 1-30s | Vanilla Azure: 500ms-15s</p>
+    <p><strong>High Complexity:</strong> Tiger Cloud: 670ms-2.6s | Azure + TimescaleDB: 10-35s | Vanilla Azure: 10-47s</p>
+    <p><strong>Incremental Materialized Views:</strong> Tiger Cloud: 4-5ms | Others: Unsupported</p>
+</div>
+
+<p><strong>Note:</strong> Vanilla PostgreSQL showed interesting patterns - it was much slower on pure time-series queries (Q1-Q3) but sometimes competitive or better than TimescaleDB (not Tiger Cloud) on complex multi-table joins (Q8, Q11, Q17, Q25-Q26, Q28). We suspect that this is due to Azure native query planner optimizations in Azure Database for Postgres. This is the kind of mysterious and unexpected variation you get when you choose to self-manage your data infrastructure.</p>
+
+<h3>Key Findings</h3>
+
+<p><strong>Tiger Cloud is fastest on 30 out of 31 queries</strong></p>
+<p>TimescaleDB wins on 1 trivial query (Q15 - simple aggregation on products table)</p>
+<p>Vanilla PG wins on 0 queries</p>
+
+<p><strong>Average Performance Gains:</strong></p>
+<p>Median speedup: ~225x faster on Tiger Cloud<br>
+Mean speedup: ~1,450x faster on Tiger Cloud<br>
+Maximum speedup: ~7,200x faster (Q7)</p>
+
+<h2>Conclusion</h2>
+
+<h3>Aside: Azure Data Explorer</h3>
+
+<p>Microsoft often recommends Azure Data Explorer for time-series workloads because of its rich user experience and its specific optimization for high-volume, timestamped data. We didn't run that benchmark at this time because RTABench doesn't yet support Kusto Query Language (AQL). Although the non standard query language is a pretty compelling reason to keep all your workloads, including time-series, in Postgres, we're pretty curious about how it would perform and hope to add support for it in the future.</p>
+
+<p>This benchmark illustrates it and you can try it yourself. If you've been held back by slow queries, storage tradeoffs, or the limitations of the Apache 2 Edition on Azure Database for PostgreSQL, the combination of functionality is compelling:</p>
+
+<ul>
+    <li>Postgres you already know</li>
+    <li>Full TimescaleDB feature set</li>
+    <li>Azure-native deployment and billing</li>
+</ul>
+
+<h3>Resources:</h3>
+<p>Azure documentation<br>
+Get started on Azure Marketplace<br>
+Questions or want to discuss your architecture? [Talk to solutions team]</p>
                 </div>
-                
-                <div class="metric-box">
-                    <h4>Azure Managed Postgres + TimescaleDB</h4>
-                    <p><strong>Min:</strong> 1s | <strong>Max:</strong> 5s</p>
-                    <p>Sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                </div>
-                
-                <div class="metric-box">
-                    <h4>Vanilla Azure Managed Postgres</h4>
-                    <p><strong>Min:</strong> 7s | <strong>Max:</strong> 120s</p>
-                    <p>Excepteur sint occaecat cupidatat non proident.</p>
-                </div>
-                
-                <h3>Key Findings</h3>
-                <p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
-                
-                <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.</p>
-                
-                <div class="milestone">
-                    <h3>25% Through the Vanilla Bar</h3>
-                    <p>Still scrolling through this massive latency...</p>
-                </div>
-                
-                <h3>Technical Details</h3>
-                <p>Aenean lacinia bibendum nulla sed consectetur. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam.</p>
-                
-                <p>Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-                
-                <div class="milestone">
-                    <h3>50% There...</h3>
-                    <p>One minute down, one to go.</p>
-                </div>
-                
-                <h3>Performance Impact</h3>
-                <p>Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.</p>
-                
-                <p>Curabitur blandit tempus porttitor. Maecenas sed diam eget risus varius blandit sit amet non magna. Donec id elit non mi porta gravida at eget metus.</p>
-                
-                <div class="milestone">
-                    <h3>75% Through</h3>
-                    <p>Tiger Cloud would have finished 15,000 times by now.</p>
-                </div>
-                
-                <h3>Real-World Implications</h3>
-                <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.</p>
-                
-                <p>Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-                
-                <h3>Conclusion</h3>
-                <p>Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                
-                <p>Vestibulum id ligula porta felis euismod semper. Maecenas faucibus mollis interdum. Sed posuere consectetur est at lobortis.</p>
             </div>
             
             <div class="legend">
