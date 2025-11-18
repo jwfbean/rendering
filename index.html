@@ -394,14 +394,9 @@
     <li>Azure Database for Postgres with the TimescaleDB extension enabled</li>
 </ul>
 
-<img src="images/image1.png" alt="Tiger Cloud service selection">
-
 <p>Due to pre-release work on Tiger Cloud, the standard Terraform setup was replaced with a manual process. Minimal tweaks were made to the RTABench execution script to accept a Postgres connection string and to remove references to platform-unsupported features (e.g., hypertables on vanilla Postgres). These changes did not affect the benchmark's data, queries, or ingest logic. Details on the modified RTABench fork are available here.</p>
 
 <p>The client host was a Standard_D2s_v3 instance running Linux (Ubuntu 24.04) with 2 vCPUs and 8GB RAM, deployed in the same Azure region (Western Europe) as the database systems. The disk was increased to 128GB to accommodate the dataset. Running the client host outside the database region would have a significant impact on load times.</p>
-
-<img src="images/image7.png" alt="Benchmark client host configuration">
-<img src="images/image8.png" alt="Client host disk configuration">
 
 <p>We analyzed the results by feeding the benchmark output files to Claude, having a conversation, and double-checking that the conclusions were sound. The process was fun and quite insightful:</p>
 
@@ -409,7 +404,7 @@
     <li>Claude's analysis was enthusiastic about the Tiger Cloud results. The performance difference is dramatic. The visual aid to the right and below illustrates the scale difference we saw (in some queries, comparing milliseconds to minutes).</li>
 </ul>
 
-<img src="images/image4.png" alt="Claude analysis of performance results">
+<img src="images/claude-marketing.png" alt="Claude analysis of performance results">
 
 <div class="milestone">
     <h3>25% Through the Vanilla Bar</h3>
@@ -420,13 +415,13 @@
     <li>Claude helped evaluate the validity of the benchmark output, eliminating the need to manually scan for problems, errors, or anomalies.</li>
 </ul>
 
-<img src="images/image6.png" alt="Claude validation of benchmark results">
+<img src="images/claude-valid-run.png" alt="Claude validation of benchmark results">
 
 <ul>
     <li>Claude helped clarify initial confusion regarding the TimescaleDB version documented by Microsoft, confirming that the extension was properly enabled and that the public documentation was simply outdated.</li>
 </ul>
 
-<img src="images/image5.png" alt="TimescaleDB version verification">
+<img src="images/claude-tsdb-222.png" alt="TimescaleDB version verification">
 
 <h2>Running RTABench</h2>
 
@@ -439,12 +434,12 @@
     <li>Spin up an 8 CPU 32GB dev service in Azure</li>
 </ol>
 
-<img src="images/image11.png" alt="Tiger Cloud service configuration">
-<img src="images/image12.png" alt="Tiger Cloud compute size selection">
+<img src="images/tiger-cloud-azure.png" alt="Tiger Cloud service configuration">
+<img src="images/tiger-cloud-compute.png" alt="Tiger Cloud compute size selection">
 
 <p>Note the connection string or save the config:</p>
 
-<img src="images/image13.png" alt="Tiger Cloud connection information">
+<img src="images/tiger-cloud-connection-string.png" alt="Tiger Cloud connection information">
 
 <ol start="3">
     <li>For a client host, start a Standard_D2s_v3 instance running Linux (ubuntu 24.04) with 2 vCPUs and 8GB RAM.</li>
@@ -471,8 +466,8 @@
     <li>In the Azure portal, create an Azure Database for Postgres Flexible Servers instance in the same region as the client host, matching the compute and storage for the Tiger Cloud instance. It's expensive, so don't leave it running for a long time.</li>
 </ol>
 
-<img src="images/image2.png" alt="Azure Database for Postgres connection details">
-<img src="images/image3.png" alt="Azure Database compute and storage configuration">
+<img src="images/azure-postgres-instance.png" alt="Azure Database for Postgres connection details">
+<img src="images/azure-postgres-connection-string.png" alt="Azure Database compute and storage configuration">
 
 <p>You can view the connection string from the Azure portal as well.</p>
 
@@ -492,8 +487,8 @@
 
 <p>To enable the TimescaleDB extension on your Azure Database extension, click TIMESCALEDB on azure.extensions and shared_preload_libraries server settings:</p>
 
-<img src="images/image9.png" alt="Azure TimescaleDB extension configuration">
-<img src="images/image10.png" alt="Azure shared preload libraries configuration">
+<img src="images/enable-timescale-1.png" alt="Azure TimescaleDB extension configuration">
+<img src="images/enable-timescale-2.png" alt="Azure shared preload libraries configuration">
 
 <ol>
     <li>This will require a restart of postgres. That should take less than 5 minutes.</li>
